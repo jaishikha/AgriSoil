@@ -5,7 +5,7 @@ import joblib
 from google import genai
 
 st.set_page_config(
-    page_title="AgriSoil AI",
+    page_title="AgriSoil",
     page_icon="🌱",
     layout="wide",
     initial_sidebar_state="collapsed"
