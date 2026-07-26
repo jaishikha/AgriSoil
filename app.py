@@ -4,7 +4,6 @@ import numpy as np
 import joblib
 from google import genai
 
-# --- PAGE SETUP ---
 st.set_page_config(
     page_title="AgriSoil AI",
     page_icon="🌱",
@@ -12,7 +11,6 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# --- TRANSLATION DICTIONARY ---
 T = {
     "English": {
         "features": "Features",
@@ -23,7 +21,6 @@ T = {
         "hero_title": 'Grow Smarter with <span class="serif-gold">Data-</span><br><span class="serif-gold">Driven</span> Soil Intelligence',
         "hero_tagline": '<span class="logo-highlight">AgriSoil</span> turns soil test numbers into instant AI diagnostics and clear fertilizer recommendations so you know exactly what your crops need.',
         
-        # Features Text
         "f1_title": "Lab Diagnostics",
         "f1_desc": "Automated ML classifier for primary parameters & micronutrients in seconds.",
         "f2_title": "Gemini AI Advisor",
@@ -31,7 +28,6 @@ T = {
         "f3_title": "Fertilizer Prescriptions",
         "f3_desc": "Actionable soil recovery advice and exact fertilizer dosage recommendations.",
         
-        # How It Works Text
         "h1_title": "Enter Parameters",
         "h1_desc": "Input test parameters like pH, EC, NPK, and micronutrients to analyze soil health.",
         "h2_title": "Run Diagnostics",
@@ -39,7 +35,6 @@ T = {
         "h3_title": "Consult Gemini AI",
         "h3_desc": "Ask follow-up queries to refine field management, soil recovery, and fertilizer dosage.",
 
-        # Diagnostic Page
         "primary_header": "🧪 Primary & Secondary Parameters",
         "micro_header": "🔬 Micronutrients (ppm)",
         "page_heading": "Enter Soil Parameters for Analysis",
@@ -58,7 +53,6 @@ T = {
         "mn_label": "Available Manganese - Mn (ppm)",
         "back_home": "← Back to Home",
 
-        # Parameter Names for Breakdown
         "param_ph": "pH Level",
         "param_ec": "Electrical Conductivity (EC)",
         "param_oc": "Organic Carbon",
@@ -78,7 +72,6 @@ T = {
         "hero_title": 'डेटा-संचालित मृदा बुद्धिमत्ता के साथ <span class="serif-gold">स्मार्ट तरीके</span> से फसल उगाएं',
         "hero_tagline": '<span class="logo-highlight">एग्रीसोइल</span> मिट्टी परीक्षण के नंबरों को तुरंत एआई निदान और स्पष्ट उर्वरक सिफारिशों में बदल देता है ताकि आप ठीक से जान सकें कि आपकी फसलों को क्या चाहिए।',
         
-        # Features Text
         "f1_title": "प्रयोगशाला निदान",
         "f1_desc": "सेकंडों में प्राथमिक मापदंडों और सूक्ष्म पोषक तत्वों के लिए स्वचालित मशीन लर्निंग वर्गीकरण।",
         "f2_title": "जेमिनी एआई सलाहकार",
@@ -86,7 +79,6 @@ T = {
         "f3_title": "उर्वरक नुस्खे",
         "f3_desc": "पोषक तत्वों की कमी के लिए व्यावहारिक मृदा सुधार सलाह और सटीक उर्वरक मात्रा सिफारिशें।",
 
-        # How It Works Text
         "h1_title": "मापदंड दर्ज करें",
         "h1_desc": "मृदा स्वास्थ्य का विश्लेषण करने के लिए पीएच, ईसी, एनपीके और सूक्ष्म पोषक तत्वों के मान दर्ज करें।",
         "h2_title": "निदान चलाएं",
@@ -94,7 +86,6 @@ T = {
         "h3_title": "जेमिनी एआई से सलाह लें",
         "h3_desc": "खेत प्रबंधन, मृदा सुधार और उर्वरक मात्रा को परिष्कृत करने के लिए प्रश्न पूछें।",
 
-        # Diagnostic Page
         "primary_header": "🧪 प्राथमिक एवं द्वितीयक मापदंड",
         "micro_header": "🔬 सूक्ष्म पोषक तत्व (ppm)",
         "page_heading": "विश्लेषण के लिए मिट्टी के मापदंड दर्ज करें",
@@ -113,7 +104,6 @@ T = {
         "mn_label": "उपलब्ध मैंगनीज - Mn (ppm)",
         "back_home": "← मुख्य पृष्ठ पर वापस जाएं",
 
-        # Parameter Names for Breakdown
         "param_ph": "पीएच स्तर (pH Level)",
         "param_ec": "विद्युत चालकता (EC)",
         "param_oc": "जैविक कार्बन (Organic Carbon)",
@@ -126,7 +116,6 @@ T = {
     }
 }
 
-# --- ML CONDITION TRANSLATIONS ---
 condition_translations = {
     "Normal Soil Reaction": "सामान्य मृदा (Normal Soil)",
     "Alkaline Soil": "क्षारीय मृदा (Alkaline Soil)",
@@ -134,7 +123,6 @@ condition_translations = {
     "Acidic Soil": "अम्लीय मृदा (Acidic Soil)"
 }
 
-# --- CUSTOM STYLING ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;800&display=swap');
@@ -150,12 +138,10 @@ st.markdown("""
         background-attachment: fixed !important;
     }
 
-    /* HIDE ANCHOR LINK ICONS ON ALL HEADINGS */
     .anchor-link, [data-testid="stHeaderActionElements"], a.aria-hidden {
         display: none !important;
     }
 
-    /* TYPOGRAPHY FOR HERO */
     .hero-title {
         font-family: 'Playfair Display', serif !important;
         font-size: 3.4rem !important;
@@ -183,7 +169,6 @@ st.markdown("""
         max-width: 92% !important;
     }
 
-    /* CLEAN MODERN FLOATING IMAGE CONTAINER WITHOUT BADGES */
     .hero-image-card {
         background: #F5EBE0;
         border-radius: 24px;
@@ -202,7 +187,6 @@ st.markdown("""
         border-radius: 16px;
     }
 
-    /* YELLOW / GOLDEN BUTTONS */
     div.stButton > button[kind="primary"] {
         background-color: #E9B44C !important;
         color: #1E3A2F !important;
@@ -239,7 +223,6 @@ st.markdown("""
         transform: translateY(-2px);
     }
 
-    /* BEIGE BENTO FEATURE & HOW IT WORKS CARDS */
     .bento-card-beige {
         background-color: #F5EBE0;
         color: #1E3A2F !important;
@@ -268,7 +251,6 @@ st.markdown("""
         margin: 0;
     }
 
-    /* DARK CARD CONTAINER FOR DIAGNOSTIC BREAKDOWN */
     .diagnostic-dark-card {
         background-color: #1E3A2F;
         border: 1px solid #3A5A40;
@@ -295,7 +277,6 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
 
-    /* FORM INPUTS & INCREASED NUMBER FONT SIZE */
     div[data-baseweb="input"] {
         background-color: #F5EBE0 !important;
         border: 1px solid #D6C3B2 !important;
@@ -312,7 +293,6 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* ABSOLUTE FORCE: STRICT DARK GREEN TEXT FOR ALL CHAT MESSAGES, ZERO YELLOW OR LIGHT TEXT */
     div[data-testid="stChatMessage"] {
         background-color: #F5EBE0 !important;
         border: 1px solid #D6C3B2 !important;
@@ -340,13 +320,11 @@ st.markdown("""
         background: transparent !important;
     }
 
-    /* PROGRESS BARS & HIGH VISIBILITY STATUS BADGES */
     .bar-container { width: 100%; background-color: #3A5A40; border-radius: 8px; height: 14px; margin: 6px 0 14px 0; overflow: hidden; }
     .bar-fill-opt { height: 100%; background-color: #00F5D4; border-radius: 8px; }
     .bar-fill-warn { height: 100%; background-color: #FFB703; border-radius: 8px; }
     .bar-fill-danger { height: 100%; background-color: #FF6B6B; border-radius: 8px; }
 
-    /* FLOATING YELLOW AI BUTTON */
     .floating-ai-btn {
         position: fixed;
         bottom: 30px;
@@ -374,12 +352,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- QUERY PARAMS ROUTING FOR FLOATING BUTTON ---
 if "view" in st.query_params and st.query_params["view"] == "chat":
     st.session_state.active_view = "chat"
     st.query_params.clear()
 
-# --- LOAD ML ASSETS ---
 @st.cache_resource
 def load_ml_assets():
     model = joblib.load('soil_classifier_model.pkl')
@@ -395,9 +371,6 @@ except Exception as e:
 if 'active_view' not in st.session_state:
     st.session_state.active_view = 'home'
 
-# ==========================================
-# 🌟 TOP NAVBAR
-# ==========================================
 col_brand, col_f, col_h, col_chat, col_lang = st.columns([2.8, 1, 1.2, 1, 1.2])
 
 with col_lang:
@@ -419,9 +392,6 @@ with col_chat:
 
 st.markdown("<hr style='border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 0.8rem 0 1.5rem 0;'>", unsafe_allow_html=True)
 
-# ==========================================
-# VIEW 1: HERO HOMEPAGE
-# ==========================================
 if st.session_state.active_view == 'home':
     
     col_h_text, col_h_img = st.columns([1.3, 1.1], gap="large")
@@ -453,7 +423,6 @@ if st.session_state.active_view == 'home':
 
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # --- SUBSECTION: FEATURES (BEIGE CARDS) ---
     st.markdown("<div id='features'></div><br><hr style='border-color:rgba(255,255,255,0.2);'><br>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='font-family: Outfit; color: #E9B44C; text-align: center; font-size:2.2rem; font-weight:800; margin-bottom: 2rem;'>{T[lang]['features']}</h2>", unsafe_allow_html=True)
     
@@ -485,7 +454,6 @@ if st.session_state.active_view == 'home':
             </div>
         """, unsafe_allow_html=True)
 
-    # --- SUBSECTION: HOW IT WORKS (BEIGE CARDS) ---
     st.markdown("<div id='how-it-works'></div><br><hr style='border-color:rgba(255,255,255,0.2);'><br>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='font-family: Outfit; color: #E9B44C; text-align: center; font-size:2.2rem; font-weight:800; margin-bottom: 2rem;'>{T[lang]['how_it_works']}</h2>", unsafe_allow_html=True)
     
@@ -517,9 +485,6 @@ if st.session_state.active_view == 'home':
             </div>
         """, unsafe_allow_html=True)
 
-# ==========================================
-# VIEW 2: DEDICATED NUMERIC ANALYSIS PAGE
-# ==========================================
 elif st.session_state.active_view == 'lab':
     
     if st.button(T[lang]["back_home"], type="secondary"):
@@ -557,7 +522,6 @@ elif st.session_state.active_view == 'lab':
             input_data = pd.DataFrame([[val_ph, val_ec, val_oc, val_p, val_k, val_zn, val_fe, val_cu, val_mn]], columns=feature_names)
             predicted_condition = model.predict(input_data)[0]
 
-            # STACKED RESULTS LAYOUT WITH HIGH VISIBILITY DARK CARDS
             st.markdown(f'<div class="diagnostic-dark-card"><h3>{T[lang]["breakdown_header"]}</h3>', unsafe_allow_html=True)
             
             def render_custom_param_bar(name, val, status_text, badge_color, bar_class, max_scale, unit=""):
@@ -574,7 +538,6 @@ elif st.session_state.active_view == 'lab':
                     </div>
                 """, unsafe_allow_html=True)
 
-            # 1. pH Evaluation (< 7: Low, 7 - 8.5: Normal, > 8.5: High)
             if val_ph < 7.0:
                 ph_status = "Low" if lang == "English" else "कम"
                 ph_badge = "#FFB703"
@@ -589,7 +552,6 @@ elif st.session_state.active_view == 'lab':
                 ph_bar = "bar-fill-danger"
             render_custom_param_bar(T[lang]["param_ph"], val_ph, ph_status, ph_badge, ph_bar, 14.0)
 
-            # 2. EC Evaluation (< 1.5: Normal, 1.5 - 3.0: Critical, > 3.0: Injurious)
             if val_ec < 1.5:
                 ec_status = "Normal" if lang == "English" else "सामान्य"
                 ec_badge = "#00F5D4"
@@ -604,7 +566,6 @@ elif st.session_state.active_view == 'lab':
                 ec_bar = "bar-fill-danger"
             render_custom_param_bar(T[lang]["param_ec"], val_ec, ec_status, ec_badge, ec_bar, 5.0, "dS/m")
 
-            # Helper for other parameters: Deficient, Optimal, High
             def render_param_bar(name_key, val, low_thresh, high_thresh, max_scale, unit=""):
                 name = T[lang][name_key]
                 pct = min(100, max(5, int((val / max_scale) * 100)))
@@ -634,19 +595,11 @@ elif st.session_state.active_view == 'lab':
                     </div>
                 """, unsafe_allow_html=True)
 
-            # 3. Organic Carbon (< 0.5: Deficient, 0.5 - 0.75: Optimal, > 0.75: High)
             render_param_bar("param_oc", val_oc, 0.5, 0.75, 2.0, "%")
-
-            # 4. Phosphorus P2O5 (< 23: Deficient, 23 - 56: Optimal, > 56: High)
             render_param_bar("param_p", val_p, 23, 56, 100.0, "kg/ha")
-
-            # 5. Potassium K2O (< 144: Deficient, 144 - 336: Optimal, > 336: High)
             render_param_bar("param_k", val_k, 144, 336, 500.0, "kg/ha")
-
-            # 6. Zinc (Critical Limit: 0.6 ppm)
             render_param_bar("param_zn", val_zn, 0.6, 2.0, 5.0, "ppm")
 
-            # 7. Iron (Critical Limit: Fe < 4.5 is Deficient, otherwise Optimal)
             fe_status_text = "Deficient" if val_fe < 4.5 else "Optimal"
             if lang != "English":
                 fe_status_text = "कम" if val_fe < 4.5 else "इष्टतम"
@@ -654,10 +607,7 @@ elif st.session_state.active_view == 'lab':
             fe_bar = "bar-fill-warn" if val_fe < 4.5 else "bar-fill-opt"
             render_custom_param_bar(T[lang]["param_fe"], val_fe, fe_status_text, fe_badge, fe_bar, 20.0, "ppm")
 
-            # 8. Copper (Critical Limit: 0.2 ppm)
             render_param_bar("param_cu", val_cu, 0.2, 2.0, 5.0, "ppm")
-
-            # 9. Manganese (Critical Limit: 2.0 ppm)
             render_param_bar("param_mn", val_mn, 2.0, 10.0, 20.0, "ppm")
 
             st.markdown('</div>', unsafe_allow_html=True)
@@ -713,9 +663,6 @@ elif st.session_state.active_view == 'lab':
                 st.markdown(f'<span style="color: #FFD166; font-weight: 700; font-size: 1.15rem;">{T[lang]["optimal_msg"]}</span>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
-# ==========================================
-# VIEW 3: DEDICATED GEMINI AI CHATBOT PAGE
-# ==========================================
 elif st.session_state.active_view == 'chat':
     
     if st.button(T[lang]["back_home"], type="secondary"):
@@ -776,9 +723,6 @@ elif st.session_state.active_view == 'chat':
             except Exception as e:
                 st.error(f"AI Service Error: {str(e)}")
 
-# ==========================================
-# 💬 FLOATING YELLOW AI BUTTON
-# ==========================================
 if st.session_state.active_view != 'chat':
     st.markdown("""
         <a href="?view=chat" target="_self" class="floating-ai-btn">
