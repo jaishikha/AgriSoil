@@ -25,6 +25,12 @@
 - Explains things like pH levels and how to take care of your fields in simple terms.
 - Strictly restricted to agriculture, soil health, and farming topics so you only get relevant guidance.
 
+## Model Performance
+
+* **Model Used:** Random Forest Classifier
+* **Accuracy:** 99.35%
+* **Evaluation Metrics:** Evaluated using an 80-20 train-test split, accuracy score, and a detailed classification report (precision, recall, f1-score and support).
+
 ## Tech stack
 
 | Layer | Choice |
