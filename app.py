@@ -324,6 +324,9 @@ st.markdown("""
     .bar-fill-opt { height: 100%; background-color: #00F5D4; border-radius: 8px; }
     .bar-fill-warn { height: 100%; background-color: #FFB703; border-radius: 8px; }
     .bar-fill-danger { height: 100%; background-color: #FF6B6B; border-radius: 8px; }
+    .bar-fill-green { height: 100%; background-color: #00F5D4; border-radius: 8px; }
+    .bar-fill-yellow { height: 100%; background-color: #FFB703; border-radius: 8px; }
+    .bar-fill-red { height: 100%; background-color: #FF6B6B; border-radius: 8px; }
 
     .floating-ai-btn {
         position: fixed;
@@ -566,7 +569,36 @@ elif st.session_state.active_view == 'lab':
                 ec_bar = "bar-fill-danger"
             render_custom_param_bar(T[lang]["param_ec"], val_ec, ec_status, ec_badge, ec_bar, 5.0, "dS/m")
 
-            def render_param_bar(name_key, val, low_thresh, high_thresh, max_scale, unit=""):
+            def render_3tier_param_bar(name_key, val, low_thresh, high_thresh, max_scale, unit=""):
+                name = T[lang][name_key]
+                pct = min(100, max(5, int((val / max_scale) * 100)))
+                
+                if val < low_thresh:
+                    status_text = "Low" if lang == "English" else "कम"
+                    bar_class = "bar-fill-red"
+                    badge_style = "color:#FF6B6B; font-weight:800;"
+                elif val > high_thresh:
+                    status_text = "High" if lang == "English" else "अधिक"
+                    bar_class = "bar-fill-green"
+                    badge_style = "color:#00F5D4; font-weight:800;"
+                else:
+                    status_text = "Medium" if lang == "English" else "मध्यम"
+                    bar_class = "bar-fill-yellow"
+                    badge_style = "color:#FFB703; font-weight:800;"
+
+                st.markdown(f"""
+                    <div style="margin-bottom: 1rem;">
+                        <div style="display:flex; justify-content:space-between; font-weight:700; color:#FFFFFF; font-size: 1.05rem;">
+                            <span>{name} ({val} {unit})</span>
+                            <span style="{badge_style}">{status_text}</span>
+                        </div>
+                        <div class="bar-container">
+                            <div class="{bar_class}" style="width: {pct}%;"></div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            def render_standard_param_bar(name_key, val, low_thresh, high_thresh, max_scale, unit=""):
                 name = T[lang][name_key]
                 pct = min(100, max(5, int((val / max_scale) * 100)))
                 
@@ -595,10 +627,13 @@ elif st.session_state.active_view == 'lab':
                     </div>
                 """, unsafe_allow_html=True)
 
-            render_param_bar("param_oc", val_oc, 0.5, 0.75, 2.0, "%")
-            render_param_bar("param_p", val_p, 23, 56, 100.0, "kg/ha")
-            render_param_bar("param_k", val_k, 144, 336, 500.0, "kg/ha")
-            render_param_bar("param_zn", val_zn, 0.6, 2.0, 5.0, "ppm")
+            # OC, P2O5, K2O use the 3-tier Red/Yellow/Green logic
+            render_3tier_param_bar("param_oc", val_oc, 0.5, 0.75, 2.0, "%")
+            render_3tier_param_bar("param_p", val_p, 23, 56, 100.0, "kg/ha")
+            render_3tier_param_bar("param_k", val_k, 144, 336, 500.0, "kg/ha")
+
+            # Micronutrients use standard thresholds
+            render_standard_param_bar("param_zn", val_zn, 0.6, 2.0, 5.0, "ppm")
 
             fe_status_text = "Deficient" if val_fe < 4.5 else "Optimal"
             if lang != "English":
@@ -607,8 +642,8 @@ elif st.session_state.active_view == 'lab':
             fe_bar = "bar-fill-warn" if val_fe < 4.5 else "bar-fill-opt"
             render_custom_param_bar(T[lang]["param_fe"], val_fe, fe_status_text, fe_badge, fe_bar, 20.0, "ppm")
 
-            render_param_bar("param_cu", val_cu, 0.2, 2.0, 5.0, "ppm")
-            render_param_bar("param_mn", val_mn, 2.0, 10.0, 20.0, "ppm")
+            render_standard_param_bar("param_cu", val_cu, 0.2, 2.0, 5.0, "ppm")
+            render_standard_param_bar("param_mn", val_mn, 2.0, 10.0, 20.0, "ppm")
 
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -622,14 +657,17 @@ elif st.session_state.active_view == 'lab':
                 if 1.5 <= val_ec <= 3.0: prescriptions.append("⚠️ **EC Critical (1.5 - 3.0 dS/m):** Moderate salinity risk; leach soil with good quality irrigation water.")
                 elif val_ec > 3.0: prescriptions.append("🚨 **EC Injurious (> 3.0 dS/m):** High salinity toxicity! Heavy leaching and organic amendments required before planting.")
 
-                if val_oc < 0.5: prescriptions.append("📉 **Organic Carbon Deficient (< 0.5%):** Add Farmyard Manure (FYM) @ 10 tonnes/ha.")
-                elif val_oc > 0.75: prescriptions.append("📈 **Organic Carbon High (> 0.75%):** Excellent organic status; maintain regular crop residue management.")
+                if val_oc < 0.5: prescriptions.append("🔴 **Organic Carbon Low (< 0.5%):** Add Farmyard Manure (FYM) @ 10 tonnes/ha.")
+                elif val_oc > 0.75: prescriptions.append("🟢 **Organic Carbon High (> 0.75%):** Excellent organic status; maintain regular crop residue management.")
+                else: prescriptions.append("🟡 **Organic Carbon Medium (0.5% - 0.75%):** Moderate status; apply standard organic compost to sustain levels.")
                 
-                if val_p < 23: prescriptions.append("📉 **Phosphorus Deficient (< 23 kg/ha):** Apply DAP or SSP.")
-                elif val_p > 56: prescriptions.append("📈 **Phosphorus High (> 56 kg/ha):** Withhold P fertilizer applications; grow cover crops to absorb excess P.")
+                if val_p < 23: prescriptions.append("🔴 **Phosphorus Low (< 23 kg/ha):** Apply DAP or SSP.")
+                elif val_p > 56: prescriptions.append("🟢 **Phosphorus High (> 56 kg/ha):** Withhold P fertilizer applications; grow cover crops to absorb excess P.")
+                else: prescriptions.append("🟡 **Phosphorus Medium (23 - 56 kg/ha):** Maintenance application of phosphorus recommended.")
                 
-                if val_k < 144: prescriptions.append("📉 **Potassium Deficient (< 144 kg/ha):** Apply Muriate of Potash (MOP).")
-                elif val_k > 336: prescriptions.append("📈 **Potassium High (> 336 kg/ha):** Avoid potash fertilizers; ensure good drainage to prevent salt accumulation.")
+                if val_k < 144: prescriptions.append("🔴 **Potassium Low (< 144 kg/ha):** Apply Muriate of Potash (MOP).")
+                elif val_k > 336: prescriptions.append("🟢 **Potassium High (> 336 kg/ha):** Avoid potash fertilizers; ensure good drainage to prevent salt accumulation.")
+                else: prescriptions.append("🟡 **Potassium Medium (144 - 336 kg/ha):** Moderate potassium levels; apply balanced maintenance doses.")
 
                 if val_zn < 0.6: prescriptions.append("🌾 **Zinc Deficient (< 0.6 ppm):** Apply Zinc Sulfate (ZnSO₄) @ 25 kg/ha.")
                 if val_fe < 4.5: prescriptions.append("🌾 **Iron Deficient (< 4.5 ppm):** Foliar spray of 0.5% Ferrous Sulfate solution.")
@@ -642,14 +680,17 @@ elif st.session_state.active_view == 'lab':
                 if 1.5 <= val_ec <= 3.0: prescriptions.append("⚠️ **ईसी गंभीर (1.5 - 3.0 dS/m):** मध्यम लवणता जोखिम; अच्छी गुणवत्ता वाले पानी से सिंचाई करें।")
                 elif val_ec > 3.0: prescriptions.append("🚨 **ईसी हानिकारक (> 3.0 dS/m):** उच्च लवणता विषाक्तता! रोपण से पहले भारी सिंचाई और लीचिंग आवश्यक है।")
 
-                if val_oc < 0.5: prescriptions.append("📉 **जैविक कार्बन अपूर्ण (< 0.5%):** 10 टन/हेक्टेयर गोबर की खाद (FYM) डालें।")
-                elif val_oc > 0.75: prescriptions.append("📈 **जैविक कार्बन अधिक (> 0.75%):** उत्कृष्ट जैविक स्थिति; नियमित फसल अवशेष प्रबंधन बनाए रखें।")
+                if val_oc < 0.5: prescriptions.append("🔴 **जैविक कार्बन कम (< 0.5%):** 10 टन/हेक्टेयर गोबर की खाद (FYM) डालें।")
+                elif val_oc > 0.75: prescriptions.append("🟢 **जैविक कार्बन अधिक (> 0.75%):** उत्कृष्ट जैविक स्थिति; नियमित फसल अवशेष प्रबंधन बनाए रखें।")
+                else: prescriptions.append("🟡 **जैविक कार्बन मध्यम (0.5% - 0.75%):** मध्यम स्तर; सामान्य खाद का उपयोग करें।")
                 
-                if val_p < 23: prescriptions.append("📉 **फास्फोरस अपूर्ण (< 23 kg/ha):** डीएपी या एसएसपी का प्रयोग करें।")
-                elif val_p > 56: prescriptions.append("📈 **फास्फोरस अधिक (> 56 kg/ha):** फॉस्फोरस उर्वरक का प्रयोग बंद करें और कवर फसलें उगाएं।")
+                if val_p < 23: prescriptions.append("🔴 **फास्फोरस कम (< 23 kg/ha):** डीएपी या एसएसपी का प्रयोग करें।")
+                elif val_p > 56: prescriptions.append("🟢 **फास्फोरस अधिक (> 56 kg/ha):** फॉस्फोरस उर्वरक का प्रयोग बंद करें और कवर फसलें उगाएं।")
+                else: prescriptions.append("🟡 **फास्फोरस मध्यम (23 - 56 kg/ha):** फॉस्फोरस का सामान्य रखरखाव डोज दें।")
                 
-                if val_k < 144: prescriptions.append("📉 **पोटाश अपूर्ण (< 144 kg/ha):** एमओपी (MOP) का प्रयोग करें।")
-                elif val_k > 336: prescriptions.append("📈 **पोटाश अधिक (> 336 kg/ha):** पोटाश उर्वरक से बचें और जल निकासी का ध्यान रखें।")
+                if val_k < 144: prescriptions.append("🔴 **पोटाश कम (< 144 kg/ha):** एमओपी (MOP) का प्रयोग करें।")
+                elif val_k > 336: prescriptions.append("🟢 **पोटाश अधिक (> 336 kg/ha):** पोटाश उर्वरक से बचें और जल निकासी का ध्यान रखें।")
+                else: prescriptions.append("🟡 **पोटाश मध्यम (144 - 336 kg/ha):** संतुलित रखरखाव मात्रा का प्रयोग करें।")
 
                 if val_zn < 0.6: prescriptions.append("🌾 **जिंक अपूर्ण (< 0.6 ppm):** 25 किलोग्राम/हेक्टेयर जिंक सल्फेट डालें।")
                 if val_fe < 4.5: prescriptions.append("🌾 **लोहा अपूर्ण (< 4.5 ppm):** 0.5% फेरस सल्फेट का छिड़काव करें।")
@@ -703,9 +744,9 @@ elif st.session_state.active_view == 'chat':
                 
                 STRICT FORMATTING RULES:
                 1. MATCH THE USER'S STYLE:
-                   - If the user's prompt explicitly includes words like "in points", "bullets", or "steps", you MUST format your answer as a clear bulleted or numbered list.
-                   - If the user's prompt includes words like "explain in detail" or "deep" WITHOUT mentioning points/bullets, you MUST format your answer as a cohesive, well-structured paragraph (NO bullet points).
-                   - If it is a short question, give a short 1-2 sentence response.
+                    - If the user's prompt explicitly includes words like "in points", "bullets", or "steps", you MUST format your answer as a clear bulleted or numbered list.
+                    - If the user's prompt includes words like "explain in detail" or "deep" WITHOUT mentioning points/bullets, you MUST format your answer as a cohesive, well-structured paragraph (NO bullet points).
+                    - If it is a short question, give a short 1-2 sentence response.
                 2. NO YELLOW OR LIGHT TEXT COLOR: Do not use yellow, gold, orange, or low-contrast highlights. All text must be neutral, dark, and high-contrast.
                 3. DOMAIN LOCK: Only answer agriculture, soil health, and farming queries.
                 
